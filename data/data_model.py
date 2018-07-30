@@ -46,10 +46,12 @@ def csvtodict(Project_filepath, bb_data, concensus_data, all_images_data, images
                                 "URL" : fetchurl(all_images_data, row[0][0:10]),
                                 "dim_x" : fetchcolvalue(bb_data, row[0], 1),
                                 "dim_y" : fetchcolvalue(bb_data, row[0], 2),
+                                "image_label" : "tbd",
                                 'observations' : [{"bb_xmin" : fetchcolvalue(bb_data, row[0], 4),
                                       "bb_ymin" : fetchcolvalue(bb_data, row[0], 5),
                                       "bb_xmax" : fetchcolvalue(bb_data, row[0], 6),
-                                      "bb_ymax" : fetchcolvalue(bb_data, row[0], 7)
+                                      "bb_ymax" : fetchcolvalue(bb_data, row[0], 7), 
+                                      "bb_label" : fetchcolvalue(bb_data, row[0], 3)
                                      }]
                                }]
                                     }
