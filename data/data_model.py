@@ -11,6 +11,8 @@ def fetchcolvalue(filename, searchkey, output_col_no):
             break
         else:
             colVal = ""
+            
+    csvfile.close()
     return colVal
 
 # URL fetching
@@ -25,6 +27,8 @@ def fetchurl(filename, searchkey):
             break
         else:
             URL = ''
+    
+    csvfile.close()
     return URL
 
 def csvtodict(Project_filepath, bb_data, concensus_data, all_images_data, images):
