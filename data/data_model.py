@@ -55,6 +55,46 @@ def dicttojson(event_dict):
     return json.dumps(event_dict)
 
 def jsontodict(event_json):
-    data = json.loads(event_json)
-    for key, value in data.iteritems(): 
-        print key, value
+    return json.loads(event_json)
+
+
+def create_tf_example(data):
+    # TODO(user): Populate the following variables from your example.
+    height = int(data['dim_y']) # Image height
+    width = int(data['dim_x']) # Image width
+    filename = str(data['Path']) # Filename of the image. Empty if image is not from file
+    #encoded_image_data = None # Encoded image bytes
+    image_format = b'jpg' # b'jpeg' or b'png'
+
+    xmins = [float(data['observations'][0]['bb_xmin'])] # List of normalized left x coordinates in bounding box (1 per box)
+    xmaxs = [float(data['observations'][0]['bb_xmax'])] # List of normalized right x coordinates in bounding box
+             # (1 per box)
+    ymins = [float(data['observations'][0]['bb_ymin'])] # List of normalized top y coordinates in bounding box (1 per box)
+    ymaxs = [float(data['observations'][0]['bb_ymax'])] # List of normalized bottom y coordinates in bounding box
+             # (1 per box)
+    #classes_text = data[''] # List of string class name of bounding box (1 per box)
+    #classes = data[''] # List of integer class id of bounding box (1 per box)
+
+    tf_example = tf.train.Example(features=tf.train.Features(feature={
+      'image/height': dataset_util.int64_feature(height),
+      'image/width': dataset_util.int64_feature(width),
+      'image/filename': dataset_util.bytes_feature(filename),
+      'image/source_id': dataset_util.bytes_feature(filename),
+      #'image/encoded': dataset_util.bytes_feature(encoded_image_data),
+      'image/format': dataset_util.bytes_feature(image_format),
+      'image/object/bbox/xmin': dataset_util.float_list_feature(xmins),
+      'image/object/bbox/xmax': dataset_util.float_list_feature(xmaxs),
+      'image/object/bbox/ymin': dataset_util.float_list_feature(ymins),
+      'image/object/bbox/ymax': dataset_util.float_list_feature(ymaxs),
+      #'image/object/class/text': dataset_util.bytes_list_feature(classes_text),
+      #'image/object/class/label': dataset_util.int64_list_feature(classes),
+    }))
+    
+    return tf_example
+
+
+def encode_to_tfr_record(test_feature):
+    writer = tf.python_io.TFRecordWriter('test_event.tfrecord')
+    example = create_tf_example(test_feature)
+    writer.write(example.SerializeToString())
+    writer.close()
