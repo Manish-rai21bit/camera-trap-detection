@@ -41,9 +41,11 @@ def jsontodict(event_json):
 def create_tf_example(data_dict):
     #with tf.gfile.GFile(os.path.join(path, '{}'.format(group.filename)), 'rb') as fid:
     encoded_jpg = resize_jpeg((data_dict['images'][0]['Path']),  1000)
-    encoded_jpg_io = io.BytesIO(encoded_jpg)
-    image = Image.open(encoded_jpg_io)
-    width, height = image.size
+    #encoded_jpg_io = io.BytesIO(encoded_jpg)
+    #image = Image.open(encoded_jpg_io)
+    #width, height = image.size
+    width = int(data_dict['images'][0]['dim_x'])
+    height = int(data_dict['images'][0]['dim_y'])
 
     filename = data_dict['images'][0]['Path'].encode('utf-8')
     image_format = b'jpg'
@@ -87,7 +89,7 @@ def encode_to_tfr_record(test_feature, out_tfr_file):
         count = 0
         for k, v in test_feature.items():
             count+=1
-            if count%100==0:
+            if count%500==0:
                 print("processing event number %s : %s" % (count, k))
             example = create_tf_example(v)
             writer.write(example.SerializeToString())
