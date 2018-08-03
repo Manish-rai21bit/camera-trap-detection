@@ -1,35 +1,4 @@
 
-def fetchcolvalue(filename, searchkey, output_col_no):
-    csvfile = open(os.path.join(Project_filepath, filename), 'r')
-    csvdata = csv.reader(csvfile, delimiter=',')
-    first_row = next(csvdata)
-    ct = 0
-    for row in csvdata:
-        if searchkey in row[ct]:
-            colVal = row[output_col_no]
-            break
-        else:
-            colVal = ""
-            
-    csvfile.close()
-    return colVal
-
-# URL fetching
-def fetchurl(filename, searchkey):
-    csvfile = open(os.path.join(Project_filepath, filename), 'r')
-    csvdata = csv.reader(csvfile, delimiter=',')
-    first_row = next(csvdata)
-    csvdata2 = sorted(csvdata, key=lambda row: (0, 1)) 
-    for row in csvdata2:
-        if row[0] == searchkey:
-            URL = 'https://snapshotserengeti.s3.msi.umn.edu/' + row[1]
-            break
-        else:
-            URL = ''
-    
-    csvfile.close()
-    return URL
-
 def csvtodict(Project_filepath, bb_data, concensus_data, all_images_data, images):
     lst = []
     event_dict = {}
@@ -37,24 +6,23 @@ def csvtodict(Project_filepath, bb_data, concensus_data, all_images_data, images
     csvdata = csv.reader(csvfile, delimiter=',')
     first_row = next(csvdata)
     for row in csvdata:
-        if row[0][0:10] not in event_dict:
-            event_dict[row[0][0:10]] = {'metadata' : {"SiteID": fetchcolvalue(concensus_data, row[0][0:10], 3), 
-                                  "DateTime": fetchcolvalue(concensus_data, row[0][0:10], 2),  
-                                  "Season": fetchcolvalue(all_images_data, row[0][0:10], 1)[0:2]},
-                                    'images' : [{"Path" : os.path.join(Project_filepath, 'Data/Schneider_Data/images/', row[0]),
-                                "URL" : fetchurl(all_images_data, row[0][0:10]),
-                                "dim_x" : fetchcolvalue(bb_data, row[0], 1),
-                                "dim_y" : fetchcolvalue(bb_data, row[0], 2),
-                                "image_label" : "tbd",
-                                'observations' : [{"bb_xmin" : fetchcolvalue(bb_data, row[0], 4),
-                                      "bb_ymin" : fetchcolvalue(bb_data, row[0], 5),
-                                      "bb_xmax" : fetchcolvalue(bb_data, row[0], 6),
-                                      "bb_ymax" : fetchcolvalue(bb_data, row[0], 7), 
-                                      "bb_primary_label" : fetchcolvalue(bb_data, row[0], 3), 
-                                      "bb_label" : {"species" : fetchcolvalue(bb_data, row[0], 3),
+        if row[0] in lst2 and row[0][0:10] not in event_dict: # the condition in lst2 is to pick only the images usd by schneider
+            event_dict[row[0][0:10]] = {'metadata' : {"SiteID": consensus_data[row[0][0:10]][0]['SiteID'],
+                                  "DateTime": consensus_data[row[0][0:10]][0]['DateTime'], 
+                                  "Season": all_images['ASG000c7bt'][0]['URL_Info'][0:2]},
+                                    'images' : [{"Path" : os.path.join(Project_filepath, row[0]),
+                                "URL" : Project_filepath + all_images[row[0][0:10]][0]['URL_Info'],
+                                "dim_x" : gold_standard_bb[row[0]][0]['width'],
+                                "dim_y" : gold_standard_bb[row[0]][0]['height'],
+                                "image_label" : "tbd", # This is the primary label in case we want to have some for the whole image
+                                'observations' : [{'bb_ymin': v['ymin'], 
+                                                   'bb_ymax': v['ymax'], 
+                                                      'bb_primary_label': v['class'], 
+                                                      'bb_xmin': v['xmin'], 
+                                                      'bb_xmax': v['xmax'], 
+                                                      'bb_label': {"species" : v['class'],
                                                     "pose" : "standing/ sitting/ running"
-                                                   }
-                                     }]
+                                                }} for k, v in enumerate(gold_standard_bb[row[0]])]
                                }]
                                     }
     return event_dict
@@ -69,44 +37,58 @@ def jsontodict(event_json):
     with open(event_json, 'r') as f:
         return json.load(f)
 
+""" creates tfrecord example from the dictionary element! """
+def create_tf_example(data_dict):
+    #with tf.gfile.GFile(os.path.join(path, '{}'.format(group.filename)), 'rb') as fid:
+    encoded_jpg = resize_jpeg((data_dict['images'][0]['Path']),  1000)
+    encoded_jpg_io = io.BytesIO(encoded_jpg)
+    image = Image.open(encoded_jpg_io)
+    width, height = image.size
 
-def create_tf_example(data):
-    # TODO(user): Populate the following variables from your example.
-    height = int(data['images'][0]['dim_y']) # Image height
-    width = int(data['images'][0]['dim_x']) # Image width
-    filename = str(data['images'][0]['Path']) # Filename of the image. Empty if image is not from file
-    encoded_image_data = resize_jpeg(str(data['images'][0]['Path']),  10) # Encoded image bytes
-    image_format = b'jpg' # b'jpeg' or b'png'
+    filename = data_dict['images'][0]['Path'].encode('utf-8')
+    image_format = b'jpg'
+    xmins = []
+    xmaxs = []
+    ymins = []
+    ymaxs = []
+    classes_text = []
+    classes = []
 
-    xmins = [float(data['images'][0]['observations'][0]['bb_xmin'])] # List of normalized left x coordinates in bounding box (1 per box)
-    xmaxs = [float(data['images'][0]['observations'][0]['bb_xmax'])] # List of normalized right x coordinates in bounding box
-             # (1 per box)
-    ymins = [float(data['images'][0]['observations'][0]['bb_ymin'])] # List of normalized top y coordinates in bounding box (1 per box)
-    ymaxs = [float(data['images'][0]['observations'][0]['bb_ymax'])] # List of normalized bottom y coordinates in bounding box
-             # (1 per box)
-    #classes_text = data[''] # List of string class name of bounding box (1 per box)
-    #classes = data[''] # List of integer class id of bounding box (1 per box)
+    for bb_record in data_dict['images'][0]['observations']:
+        xmins.append(float(bb_record['bb_xmin']) / width)
+        xmaxs.append(float(bb_record['bb_xmax']) / width)
+        ymins.append(float(bb_record['bb_ymin']) / height)
+        ymaxs.append(float(bb_record['bb_ymax']) / height)
+        classes_text.append(bb_record['bb_primary_label'].encode('utf8'))
+        classes.append(class_text_to_int(bb_record['bb_primary_label']))
 
     tf_example = tf.train.Example(features=tf.train.Features(feature={
-      'image/height': dataset_util.int64_feature(height),
-      'image/width': dataset_util.int64_feature(width),
-      'image/filename': dataset_util.bytes_feature(filename),
-      'image/source_id': dataset_util.bytes_feature(filename),
-      'image/encoded': dataset_util.bytes_feature(encoded_image_data),
-      'image/format': dataset_util.bytes_feature(image_format),
-      'image/object/bbox/xmin': dataset_util.float_list_feature(xmins),
-      'image/object/bbox/xmax': dataset_util.float_list_feature(xmaxs),
-      'image/object/bbox/ymin': dataset_util.float_list_feature(ymins),
-      'image/object/bbox/ymax': dataset_util.float_list_feature(ymaxs),
-      #'image/object/class/text': dataset_util.bytes_list_feature(classes_text),
-      #'image/object/class/label': dataset_util.int64_list_feature(classes),
+        'image/height': dataset_util.int64_feature(height),
+        'image/width': dataset_util.int64_feature(width),
+        'image/filename': dataset_util.bytes_feature(filename),
+        'image/source_id': dataset_util.bytes_feature(filename),
+        'image/encoded': dataset_util.bytes_feature(encoded_jpg),
+        'image/format': dataset_util.bytes_feature(image_format),
+        'image/object/bbox/xmin': dataset_util.float_list_feature(xmins),
+        'image/object/bbox/xmax': dataset_util.float_list_feature(xmaxs),
+        'image/object/bbox/ymin': dataset_util.float_list_feature(ymins),
+        'image/object/bbox/ymax': dataset_util.float_list_feature(ymaxs),
+        'image/object/class/text': dataset_util.bytes_list_feature(classes_text),
+        'image/object/class/label': dataset_util.int64_list_feature(classes),
     }))
+
     
     return tf_example
 
-
+"""This iterates over each dictionary item, creates tf examples, 
+    serializes the tfrecord examples and writes to a tfrecord file!!!"""
 def encode_to_tfr_record(test_feature, out_tfr_file):
     with tf.python_io.TFRecordWriter(out_tfr_file) as writer:
+        count = 0
         for k, v in test_feature.items():
+            count+=1
+            if count%100==0:
+                print("processing event number %s : %s" % (count, k))
             example = create_tf_example(v)
             writer.write(example.SerializeToString())
+            
