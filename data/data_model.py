@@ -1,4 +1,6 @@
 
+"""This function takes the GSSS bounding box dataset published by in the paper
+    and converts it into a dictionary object. The column names in the CSV has to maintained"""
 def csvtodict(Project_filepath, bb_data, concensus_data, all_images_data, images):
     lst = []
     event_dict = {}
@@ -27,17 +29,21 @@ def csvtodict(Project_filepath, bb_data, concensus_data, all_images_data, images
                                     }
     return event_dict
 
-
+"""This function writes the dictionary object to a json file.
+    The outful file will act as a centeralized repository for building training dataset."""
 def dicttojson(event_dict):
     with open('event_dict.json', 'w') as outfile:
         json.dump(event_dict, outfile)
     #return json.dump(event_dict, outfile)
 
+"""This function creates a dictionary from the json dump.
+    The dictionary object can be fed into the input pipeline to
+    create a TFRecord file."""
 def jsontodict(event_json):
     with open(event_json, 'r') as f:
         return json.load(f)
 
-""" creates tfrecord example from the dictionary element! """
+""" This function creates a tfrecord example from the dictionary element!"""
 def create_tf_example(data_dict):
     #with tf.gfile.GFile(os.path.join(path, '{}'.format(group.filename)), 'rb') as fid:
     encoded_jpg = resize_jpeg((data_dict['images'][0]['Path']),  1000)
@@ -83,7 +89,8 @@ def create_tf_example(data_dict):
     return tf_example
 
 """This iterates over each dictionary item, creates tf examples, 
-    serializes the tfrecord examples and writes to a tfrecord file!!!"""
+    serializes the tfrecord examples and writes to a tfrecord file!!!
+    As of now, it saves the TFRecord file in the home directory where the code is executed"""
 def encode_to_tfr_record(test_feature, out_tfr_file):
     with tf.python_io.TFRecordWriter(out_tfr_file) as writer:
         count = 0
