@@ -1,6 +1,12 @@
 
 """This function takes the GSSS bounding box dataset published by in the paper
-    and converts it into a dictionary object. The column names in the CSV has to maintained"""
+    and converts it into a dictionary object. The column names in the CSV has to maintained.
+    
+1. csvtodict - creates dictionary objects. have to rename this function.
+2. dicttojson - JSON dump of the dictionary.
+3. jsontodict - JSON file to a dictionary for reading into a TFRecord.
+4. create_tf_example - Creates a tf_example.
+5. encode_to_tfr_record - Creates a TF Record file"""
 def csvtodict(Project_filepath, bb_data, concensus_data, all_images_data, images):
     lst = []
     event_dict = {}
@@ -12,7 +18,7 @@ def csvtodict(Project_filepath, bb_data, concensus_data, all_images_data, images
             event_dict[row[0][0:10]] = {'metadata' : {"SiteID": consensus_data[row[0][0:10]][0]['SiteID'],
                                   "DateTime": consensus_data[row[0][0:10]][0]['DateTime'], 
                                   "Season": all_images['ASG000c7bt'][0]['URL_Info'][0:2]},
-                                    'images' : [{"Path" : os.path.join(Project_filepath, row[0]),
+                                    'images' : [{"Path" : os.path.join(Project_filepath, 'Data/images', row[0]),
                                 "URL" : Project_filepath + all_images[row[0][0:10]][0]['URL_Info'],
                                 "dim_x" : gold_standard_bb[row[0]][0]['width'],
                                 "dim_y" : gold_standard_bb[row[0]][0]['height'],
@@ -68,7 +74,7 @@ def create_tf_example(data_dict):
         ymins.append(float(bb_record['bb_ymin']) / height)
         ymaxs.append(float(bb_record['bb_ymax']) / height)
         classes_text.append(bb_record['bb_primary_label'].encode('utf8'))
-        classes.append(class_text_to_int(bb_record['bb_primary_label']))
+        classes.append(label_map[bb_record['bb_primary_label']])
 
     tf_example = tf.train.Example(features=tf.train.Features(feature={
         'image/height': dataset_util.int64_feature(height),
