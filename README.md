@@ -1,12 +1,17 @@
 # camera-trap-detection
 
 Model training pipeline
+
 cd /Users/manishrai/Desktop/UMN/Research/Zooniverse/Code/tensorflow/models/my_workspace/training_demo
 
 PIPELINE_CONFIG_PATH='training/faster_rcnn_resnet101_coco.config'
+
 MODEL_DIR='/Users/manishrai/Desktop/UMN/Research/Zooniverse/Code/tensorflow/models/my_workspace/training_demo/training/'
+
 NUM_TRAIN_STEPS=500
+
 NUM_EVAL_STEPS=20
+
 python model_main.py \
     --pipeline_config_path=${PIPELINE_CONFIG_PATH}  \
     --model_dir=${MODEL_DIR} \
