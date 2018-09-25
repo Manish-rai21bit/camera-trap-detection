@@ -1,4 +1,12 @@
-# camera-trap-detection
+# Deep Learning for species detection in camera-trap data
+
+Camera-traps are a rich data source for ecologists and is used to get a sense of the species population in the wild.
+
+Steps for prediction are:
+1. Create the tensorflow record for training and testing data. Here is the code used to generate the [tf_record](https://github.com/Manish-rai21bit/camera-trap-detection/blob/master/Data_Model.ipynb). <br>
+Once the data is created for training and testing we can use this data to train our model and test the performance.<br>
+2. A pre-trained Faster R-CNN is used as the base and retrained for our specific task of animal detection. The pre-trained model can be downloaded from [Tensorflow detection model zoo](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/detection_model_zoo.md). <br>
+3. The directory structure for the training and prediction can be made similar to the [training_demo](https://github.com/Manish-rai21bit/camera-trap-detection/tree/master/training_demo). This directory can be placed inside the tensorflow/model directory from where we can trigger the below model training pipeline and graph export pipeline.
 
 Model training pipeline
 
