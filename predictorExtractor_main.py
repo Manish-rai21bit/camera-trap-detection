@@ -1,5 +1,10 @@
 """Main function for extracting TFRecord to a csv. 
-Uses the helper modules predictor_extractor.py"""
+Uses the helper modules predictor_extractor.py
+
+python predictorExtractor_main.py \
+    --tfrecord_path_list 'Predictions/snapshot_serengeti_s01_s06-0-10000.record' \
+    --output_csv 'Predictions/snapshot_serengeti_test2.csv'
+"""
 
 import argparse
 
