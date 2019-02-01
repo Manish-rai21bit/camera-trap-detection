@@ -1,7 +1,6 @@
 """module for identifying images to be shown to volunteers and images for the training loop"""
 import csv
 
-import data_prep.data_prep_utils as dataprep_utils
 
 def pred_groundtruth_consolidate_csv_to_dict(pred_groundtruth_consolidate_csv):
     """This function takes the csv with groundtruth boxes and creates a dictionary object 
@@ -64,18 +63,16 @@ def get_correct_incorrect_images(pred_groundtruth_consolidate_dict):
 def training_data_prep_from_correct_prediction(prediction_csv_path,
                                                 correct_list, 
                                                 corrected_image_species_list, 
-                                                label_map_json
+                                                label_map
                                               ):
     """Takes in the original CSV with bounding box predictions, filters out the correct pridictions
     and corrects the labels for the images that are in the corrected_image_species_list.
     Returns a dataframe with correctly predicted bounding boxes that can be used to build the TFRecords
     
     prediction_csv_path '/home/ubuntu/data/tensorflow/my_workspace/training_demo/Predictions/snapshot_serengeti_test2.csv'
-    label_map_json '/home/ubuntu/data/tensorflow/my_workspace/camera-trap-detection/data/LILA/label_map.json' 
     """
     
     predicted_df = pd.read_csv(prediction_csv_path)
-    label_map = dataprep_utils.get_label_map_from_json(label_map_json)
     inverse_label_map = {v: k for k, v in label_map.items()}
 
     corrected_image_list = [file[0] for file in corrected_image_species_list]
