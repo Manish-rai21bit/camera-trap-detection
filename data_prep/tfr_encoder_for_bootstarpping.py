@@ -3,11 +3,12 @@ Contains TFRecord encoder and decored and supporting functions for dealing
 with TFRecord."""
 
 import tensorflow as tf
-import os, csv
+import os, csv, io
+from PIL import Image
 
 from data.utils import dataset_util
-# import data_prep.data_prep_utils as dataprep_utils
-# import data_prep.image as img
+import data_prep.data_prep_utils as dataprep_utils
+import data.image as img
 
 
 """This function takes the GSSS bounding box dataset published by in the paper
@@ -18,10 +19,10 @@ from data.utils import dataset_util
 3. jsontodict - JSON file to a dictionary for reading into a TFRecord.
 4. create_tf_example - Creates a tf_example.
 5. encode_to_tfr_record - Creates a TF Record file"""
-def csvtodict(Project_filepath, bb_data):
+def csvtodict(image_filepath, bb_data):
     lst = []
     record_dict = {}
-    csvfile = open(os.path.join(Project_filepath, bb_data), 'r')
+    csvfile = open(os.path.join(bb_data), 'r')
     csvdata = csv.reader(csvfile, delimiter=',')
     first_row = next(csvdata)
     for row in csvdata:
@@ -29,7 +30,7 @@ def csvtodict(Project_filepath, bb_data):
             record_dict[row[0]] = {'metadata' : {"SiteID": row[0].split('/')[1],
                                   "DateTime": "placeholder", 
                                   "Season": row[0].split('/')[0]},
-                                    'images' : [{"Path" : os.path.join(Project_filepath, row[0] + '.JPG'), #points to the route of image on the disk
+                                    'images' : [{"Path" : os.path.join(image_filepath, row[0] + '.JPG'), #points to the route of image on the disk
                                 "URL" : 'placeholder',
                                 "dim_x" : 'placeholder',
                                 "dim_y" : 'placeholder',
@@ -52,12 +53,12 @@ def csvtodict(Project_filepath, bb_data):
 def create_tf_example(data_dict, 
                       label_map
                      ):
-#     encoded_jpg = img.resize_jpeg((data_dict['images'][0]['Path']),  1000)
-#     encoded_jpg_io = io.BytesIO(encoded_jpg)
-#     image = Image.open(encoded_jpg_io)
-#     width, height = image.size
-#     width = int(width)
-#     height = int(height)
+    encoded_jpg = img.resize_jpeg((data_dict['images'][0]['Path']),  1000)
+    encoded_jpg_io = io.BytesIO(encoded_jpg)
+    image = Image.open(encoded_jpg_io)
+    width, height = image.size
+    width = int(width)
+    height = int(height)
 
     filename = data_dict['images'][0]['Path'].encode('utf-8')
     image_format = b'jpg'
@@ -73,12 +74,12 @@ def create_tf_example(data_dict,
         classes.append(label_map[bb_record['bb_primary_label']])
 
     tf_example = tf.train.Example(features=tf.train.Features(feature={
-#         'image/height': dataset_util.int64_feature(height),
-#         'image/width': dataset_util.int64_feature(width),
-#         'image/filename': dataset_util.bytes_feature(filename),
-#         'image/source_id': dataset_util.bytes_feature(filename),
-#         'image/encoded': dataset_util.bytes_feature(encoded_jpg),
-#         'image/format': dataset_util.bytes_feature(image_format),
+        'image/height': dataset_util.int64_feature(height),
+        'image/width': dataset_util.int64_feature(width),
+        'image/filename': dataset_util.bytes_feature(filename),
+        'image/source_id': dataset_util.bytes_feature(filename),
+        'image/encoded': dataset_util.bytes_feature(encoded_jpg),
+        'image/format': dataset_util.bytes_feature(image_format),
         'image/object/bbox/xmin': dataset_util.float_list_feature(xmins),
         'image/object/bbox/xmax': dataset_util.float_list_feature(xmaxs),
         'image/object/bbox/ymin': dataset_util.float_list_feature(ymins),
