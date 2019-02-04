@@ -1,10 +1,10 @@
 """tfrecord encoder for the training dataset created in the bootstrapped step.
 
 python tfr_encoder_for_bootstarpping_main.py \
---image_filepath '/panfs/roc/groups/5/packerc/shared/albums/SER/' \
---bounding_box_csv 'snapshot_serengeti_test3.csv' \
---label_map_json '/home/ubuntu/data/tensorflow/my_workspace/camera-trap-detection/data/LILA/label_map.json' \
---output_tfrecord_file 'out_tfr_file.record'
+    --image_filepath '/panfs/roc/groups/5/packerc/shared/albums/SER/' \
+    --bounding_box_csv 'bootstrap_data_snapshot_serengeti_s01_s06-0-10000.csv' \
+    --label_map_json '/home/packerc/rai00007/camera-trap-detection/data/LILA/label_map.json' \
+    --output_tfrecord_file 'out_tfr_file.record'
 """
 
 import argparse 
