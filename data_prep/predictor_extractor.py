@@ -77,8 +77,8 @@ def predictorExtractor(tfrecord_path_list,
                 if score[rec_i, box_i] < score_threshold:
                     continue
                 xmins_d.append(xmin_d[rec_i, box_i].numpy())
-                ymins_d.append(xmax_d[rec_i, box_i].numpy())
-                xmaxs_d.append(ymax_d[rec_i, box_i].numpy())
+                ymins_d.append(ymin_d[rec_i, box_i].numpy())
+                xmaxs_d.append(xmax_d[rec_i, box_i].numpy())
                 ymaxs_d.append(ymax_d[rec_i, box_i].numpy())
                 labels_d.append(int(label_d[rec_i, box_i].numpy()))
                 scores.append(score[rec_i, box_i].numpy())
@@ -89,7 +89,7 @@ def predictorExtractor(tfrecord_path_list,
             if box_counter == 0:
                 filenames_without_predictions.append(filename[rec_i].numpy().decode('utf-8'))
 
-        print('image: {0} finished'.format(i))
+        print('Batch: {0} finished'.format(i))
     
      # Create pandas dataframe
     df_predictions = pd.DataFrame({'labels':labels_d, 
