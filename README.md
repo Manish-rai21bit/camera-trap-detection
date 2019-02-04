@@ -33,3 +33,31 @@ python export_inference_graph.py \
     --pipeline_config_path training/faster_rcnn_resnet101_coco.config \
     --trained_checkpoint_prefix training/model.ckpt-500 \
     --output_directory trained-inference-graphs/output_inference_graph_v1.pb
+
+
+
+### Pipeline for boorstrapping data preparation for feeding back to training loop
+python predictorExtractor_main.py \
+    --tfrecord_path_list '/home/ubuntu/data/tensorflow/my_workspace/training_demo/Predictions/snapshot_serengeti_s01_s06-0-10000.record' \
+    --output_csv '/home/ubuntu/data/tensorflow/my_workspace/training_demo/Predictions/snapshot_serengeti_s01_s06-0-10000.csv'
+
+
+python prediction_groundtruth_consolidation_main.py \
+    --prediction_csv_path '/home/ubuntu/data/tensorflow/my_workspace/training_demo/Predictions/snapshot_serengeti_s01_s06-0-10000.csv' \
+    --groundtruth_csv_path '/home/ubuntu/data/tensorflow/my_workspace/camera-trap-detection/data/LILA/db_export_season_all_cleaned.csv' \
+    --label_map_json '/home/ubuntu/data/tensorflow/my_workspace/camera-trap-detection/data/LILA/label_map.json' \
+    --outfile '/home/ubuntu/data/tensorflow/my_workspace/camera-trap-detection/pred_groundtruth_consolidate_csv.csv'
+
+
+python bootstrapping_data_prep_main.py \
+    --pred_groundtruth_consolidate_csv '/home/ubuntu/data/tensorflow/my_workspace/camera-trap-detection/pred_groundtruth_consolidate_csv.csv' \
+    --prediction_csv_path '/home/ubuntu/data/tensorflow/my_workspace/training_demo/Predictions/snapshot_serengeti_s01_s06-0-10000.csv' \
+    --label_map_json '/home/ubuntu/data/tensorflow/my_workspace/camera-trap-detection/data/LILA/label_map.json' \
+    --outfile '/home/ubuntu/data/tensorflow/my_workspace/training_demo/Predictions/bootstrap_data_snapshot_serengeti_s01_s06-0-10000.csv'
+
+**move some files around and run this on MSI**
+python tfr_encoder_for_bootstarpping_main.py \
+    --image_filepath '/panfs/roc/groups/5/packerc/shared/albums/SER/' \
+    --bounding_box_csv 'bootstrap_data_snapshot_serengeti_s01_s06-0-10000.csv' \
+    --label_map_json '/home/packerc/rai00007/camera-trap-detection/data/LILA/label_map.json' \
+    --output_tfrecord_file 'out_tfr_file.record'
