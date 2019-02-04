@@ -1,5 +1,6 @@
 """module for identifying images to be shown to volunteers and images for the training loop"""
 import csv
+import pandas as pd
 
 
 def pred_groundtruth_consolidate_csv_to_dict(pred_groundtruth_consolidate_csv):
