@@ -73,10 +73,20 @@ def prediction_groundtruth_intersection_dataframe(groundtruth_dataframe,
 
 def merged_groundtruth_prediction_dataframe(groundtruth_dataframe,
                                             prediction_dataframe,
+                                            label_map_df,
                                             join_type='outer'):
     groundtruth_prediction_dataframe = pd.merge(left=groundtruth_dataframe,
                                                 right=prediction_dataframe,
                                                 left_on=['filename', 'labels'],
                                                 right_on=['filename', 'labels'],
                                                 how=join_type)
+
+    groundtruth_prediction_dataframe = groundtruth_prediction_dataframe[['filename', 'labels', 'groundtruth_counts','prediction_counts']]
+    groundtruth_prediction_dataframe = pd.merge(left=groundtruth_prediction_dataframe,
+                                                right=label_map_df,
+                                                left_on=['labels'],
+                                                right_on=['labels'],
+                                                how='left')
+    groundtruth_prediction_dataframe = groundtruth_prediction_dataframe[['filename', 'species', 'labels', 'groundtruth_counts','prediction_counts']]
+
     return groundtruth_prediction_dataframe
