@@ -44,6 +44,7 @@ if __name__=='__main__':
                                                      )
     df = pgc.merged_groundtruth_prediction_dataframe(gt_i, \
                                             pred_i, \
+                                            label_map_df, 
                                             join_type='outer')
     print("Writing File to location: ", args.outfile)
     df.to_csv(args.outfile, index=False)

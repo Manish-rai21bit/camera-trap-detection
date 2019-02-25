@@ -59,7 +59,7 @@ python bootstrapping_data_prep_main.py \
     --label_map_json '/home/ubuntu/data/tensorflow/my_workspace/camera-trap-detection/data/LILA/label_map.json' \
     --outfile '/home/ubuntu/data/tensorflow/my_workspace/training_demo/Predictions/bootstrap_data_snapshot_serengeti_s01_s06-0-10000.csv'
 
-**move some files around and run this on MSI** <br>
+**move the output of the abobe file to MSI and run this on MSI** <br>
 **TFRecord encoder for bootstrapped bounding box**<br>
 python tfr_encoder_for_bootstarpping_main.py \
     --image_filepath '/panfs/roc/groups/5/packerc/shared/albums/SER/' \
