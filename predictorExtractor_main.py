@@ -1,10 +1,5 @@
 """Main function for extracting TFRecord to a csv. 
-Uses the helper modules predictor_extractor.py
-
-python predictorExtractor_main.py \
-    --tfrecord_path_list 'Predictions/snapshot_serengeti_s01_s06-0-10000.record' \
-    --output_csv 'Predictions/snapshot_serengeti_test2.csv'
-"""
+Uses the helper modules predictor_extractor.py"""
 
 import argparse
 
@@ -26,6 +21,9 @@ if __name__ == '__main__':
     parser.add_argument(
         "--score_threshold", type=float, default=0.5,
         help="score thresholds to write to csv")
+    parser.add_argument(
+        "--discard_image_pixels", type=bool, default=True,
+        help="True to discard the pixel encodings or when pixel encodings are not present in the datafile")
 
 
 

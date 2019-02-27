@@ -64,6 +64,10 @@ def process_grondtruth_classification_data(dataframe,
 def prediction_groundtruth_intersection_dataframe(groundtruth_dataframe, 
                                                   prediction_dataframe
                                                  ):
+    """Returns dataframe with images in the intersection of groundtruth and prediction images
+    prediction data aggregated by image, species and count, and groundtruth data
+    list of images that intersect
+    """
     intersection_images = list(set(groundtruth_dataframe.filename).intersection(set(prediction_dataframe.filename)))
     groundtruth_dataframe_intersection = groundtruth_dataframe.loc[groundtruth_dataframe['filename'].isin(intersection_images)]
     prediction_dataframe_intersection = prediction_dataframe.loc[prediction_dataframe['filename'].isin(intersection_images)]
@@ -75,12 +79,13 @@ def merged_groundtruth_prediction_dataframe(groundtruth_dataframe,
                                             prediction_dataframe,
                                             label_map_df,
                                             join_type='outer'):
+    """returns dataframe with groundtruth dataframe and the predicted datframe merged"""
     groundtruth_prediction_dataframe = pd.merge(left=groundtruth_dataframe,
                                                 right=prediction_dataframe,
                                                 left_on=['filename', 'labels'],
                                                 right_on=['filename', 'labels'],
                                                 how=join_type)
-
+    
     groundtruth_prediction_dataframe = groundtruth_prediction_dataframe[['filename', 'labels', 'groundtruth_counts','prediction_counts']]
     groundtruth_prediction_dataframe = pd.merge(left=groundtruth_prediction_dataframe,
                                                 right=label_map_df,
@@ -88,5 +93,5 @@ def merged_groundtruth_prediction_dataframe(groundtruth_dataframe,
                                                 right_on=['labels'],
                                                 how='left')
     groundtruth_prediction_dataframe = groundtruth_prediction_dataframe[['filename', 'species', 'labels', 'groundtruth_counts','prediction_counts']]
-
+    
     return groundtruth_prediction_dataframe

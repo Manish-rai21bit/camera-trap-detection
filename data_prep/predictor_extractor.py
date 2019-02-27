@@ -4,7 +4,7 @@ import pandas as pd
 
 tf.enable_eager_execution()
 
-def decode_record(serialized_example):
+def decode_record(serialized_example, discard_image_pixels=True):
     """This section contains the helper functions needed for 
     decoding TFRecord...
     1. decode_record: This function decodes a TFexample with the following features
@@ -23,7 +23,7 @@ def decode_record(serialized_example):
 
     context_features = {
                         'image/filename': tf.FixedLenFeature([], tf.string),
-                        'image/encoded': tf.FixedLenFeature([], tf.string),
+                        # 'image/encoded': tf.FixedLenFeature([], tf.string),
                         'image/format': tf.FixedLenFeature([], tf.string),
                         "image/detection/bbox/xmin" : tf.VarLenFeature(tf.float32),
                         "image/detection/bbox/xmax" : tf.VarLenFeature(tf.float32),
@@ -45,6 +45,7 @@ def decode_record(serialized_example):
 
 def predictorExtractor(tfrecord_path_list,
                        output_csv,
+                       discard_image_pixels=True,
                        batch_size=512, 
                        score_threshold=0.5):
     dataset = tf.data.Dataset.from_tensor_slices(tfrecord_path_list)
@@ -59,8 +60,8 @@ def predictorExtractor(tfrecord_path_list,
     for i, (context, sequence) in enumerate(dataset):
         batch_shape = context['image/detection/bbox/xmin'].dense_shape
         #context['image/detection/bbox/xmin'][2]
-
-        img = context['image/encoded']
+        # if discard_image_pixels!=True:
+        # img = context['image/encoded']
         filename = context['image/filename']
         # Features added during the detection phase 
         xmin_d = tf.sparse_tensor_to_dense(context['image/detection/bbox/xmin'])
