@@ -19,7 +19,7 @@ sys.path.append('/home/ubuntu/data/tensorflow/my_workspace/camera-trap-detection
 from data.utils import dataset_util
 
 
-def decode_record(serialized_example):
+def decode_record_pred(serialized_example):
     """Decode the TFRecord data for each example. """
     context_features = {
                         'image/filename': tf.FixedLenFeature([], tf.string),
@@ -43,7 +43,7 @@ def decode_record(serialized_example):
     return ({k: v for k, v in context.items()},{k: v for k, v in sequence.items()})
 
 
-def plot_images_with_bbox(filename_list, outfile, inv_label_map, num_batches=1, 
+def plot_images_with_bbox_pred(filename_list, outfile, inv_label_map, num_batches=1, 
                           score_threshold=0.5, batch_size= 2):
     """Plot n images with bounding boxes and save it in the location givenself.
     filename_list : list of TFRecords
@@ -53,7 +53,7 @@ def plot_images_with_bbox(filename_list, outfile, inv_label_map, num_batches=1,
     dataset = tf.data.Dataset.from_tensor_slices(filename_list)
     dataset = tf.data.TFRecordDataset(dataset)
     dataset = dataset.shuffle(buffer_size=batch_size)
-    dataset = dataset.map(lambda x: decode_record(serialized_example=x)).batch(batch_size)
+    dataset = dataset.map(lambda x: decode_record_pred(serialized_example=x)).batch(batch_size)
 
     for i, (context, sequence) in enumerate(dataset):
         if i<num_batches:
@@ -68,22 +68,23 @@ def plot_images_with_bbox(filename_list, outfile, inv_label_map, num_batches=1,
 
             for rec_i in range(0, int(batch_shape[0])):
                 xmins_d, ymins_d, xmaxs_d, ymaxs_d, labels_d, scores, filenames = [], [], [], [], [], [], []
-                for box_i in range(0, int(batch_shape[1])):
-                    if score[rec_i, box_i] < score_threshold:
-                        continue
-
-                    img = context['image/encoded'][rec_i]
-                    encoded_jpg_io = io.BytesIO(img.numpy())
-                    image = Image.open(encoded_jpg_io)
-                    width, height = image.size
-
-                    xmins_d.append((xmin_d[rec_i, box_i].numpy())*width)
-                    ymins_d.append((ymin_d[rec_i, box_i].numpy())*height)
-                    xmaxs_d.append((xmax_d[rec_i, box_i].numpy())*width)
-                    ymaxs_d.append((ymax_d[rec_i, box_i].numpy())*height)
-                    labels_d.append(int(label_d[rec_i, box_i].numpy()))
-                    scores.append(score[rec_i, box_i].numpy())
-                    filenames.append(filename[rec_i].numpy().decode('utf-8'))
+                
+                img = context['image/encoded'][rec_i]
+                encoded_jpg_io = io.BytesIO(img.numpy())
+                image = Image.open(encoded_jpg_io)
+                width, height = image.size
+                
+                filenames.append(filename[rec_i].numpy().decode('utf-8'))
+                
+                for box_i in range(0, int(batch_shape[1])):                    
+                    if score[rec_i, box_i] >= score_threshold:
+#                         continue
+                        xmins_d.append((xmin_d[rec_i, box_i].numpy())*width)
+                        ymins_d.append((ymin_d[rec_i, box_i].numpy())*height)
+                        xmaxs_d.append((xmax_d[rec_i, box_i].numpy())*width)
+                        ymaxs_d.append((ymax_d[rec_i, box_i].numpy())*height)
+                        labels_d.append(int(label_d[rec_i, box_i].numpy()))
+                        scores.append(score[rec_i, box_i].numpy())
 
                 # Create figure and axes
                 fig,ax = plt.subplots(1)

@@ -1,11 +1,11 @@
 """Main function for visualizing the predictions and saving 
 them to a directory
 
-python prediction_visualization_main.py \
+python tfr_visualization_main.py \
 --filename_list '/home/ubuntu/data/tensorflow/my_workspace/training_demo/Predictions/snapshot_serengeti_s01_s06-0-10000.record' \
 --outfile '/home/ubuntu/data/tensorflow/my_workspace/camera-trap-detection/test_images/' \
 --label_map_json '/home/ubuntu/data/tensorflow/my_workspace/camera-trap-detection/data/LILA/label_map.json' \
---num_batches 4
+--num_batches 128
 """
 
 import json, argparse
@@ -13,7 +13,7 @@ import matplotlib
 matplotlib.use('Agg')
 
 
-import data_prep.prediction_visualization as visual
+import data_prep.tfr_visualization as visual
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -37,4 +37,4 @@ if __name__ == '__main__':
          label_map = json.load(f)
     inv_label_map = {v: k for k, v in label_map.items()}
         
-    visual.plot_images_with_bbox(args.filename_list, args.outfile, inv_label_map, args.num_batches)
+    visual.plot_images_with_bbox_pred(args.filename_list, args.outfile, inv_label_map, args.num_batches)
