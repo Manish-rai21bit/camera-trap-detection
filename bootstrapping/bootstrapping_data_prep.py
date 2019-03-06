@@ -39,7 +39,6 @@ def get_correct_incorrect_images(pred_groundtruth_consolidate_dict):
     correct_list, corrected_image_species_list, incorrect_list = [], [], []
     
     for filename, value in pred_groundtruth_consolidate_dict.items():
-        use_for_train_flag = False
         # Checking out the perfect matches
         if value['prediction_counts'] == value['groundtruth_counts']:
             correct_list.append(filename)
