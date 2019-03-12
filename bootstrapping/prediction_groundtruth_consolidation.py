@@ -43,8 +43,8 @@ def process_grondtruth_classification_data(dataframe,
     groundtruth_df_img3 = groundtruth_df[['species', 'count', 'image3']]
     groundtruth_df_img3 = groundtruth_df_img3.rename(columns = {'image3':'filename'}, index=str)
 
-    groundtruth_df_img.append(groundtruth_df_img2)
-    groundtruth_df_img.append(groundtruth_df_img3)
+    groundtruth_df_img = groundtruth_df_img.append(groundtruth_df_img2)
+    groundtruth_df_img = groundtruth_df_img.append(groundtruth_df_img3)
 
     # The groundtruth/classification data has a lot empty images. removing the empty images
     groundtruth_df_img = groundtruth_df_img[groundtruth_df_img['species']!= 'empty']
@@ -57,7 +57,12 @@ def process_grondtruth_classification_data(dataframe,
                             how='inner')
     groundtruth_df_img = groundtruth_df_img[['filename', 'species_x', 'labels', 'count']]\
                             .rename(columns = {'species_x':'species', 'count': 'groundtruth_counts'}, index=str)
-    groundtruth_df_img['filename'] = [big_filename[4:-4]for big_filename in groundtruth_df_img['filename']]
+    
+    # Removing instances where NaN appears in images/filename column
+    groundtruth_df_img.filename = groundtruth_df_img.filename.fillna(0)
+    groundtruth_df_img = groundtruth_df_img[groundtruth_df_img['filename']!= 0]
+    
+    groundtruth_df_img['filename'] = [big_filename[4:-4] for big_filename in groundtruth_df_img['filename']]
     
     return groundtruth_df_img
 
