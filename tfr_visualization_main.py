@@ -5,7 +5,7 @@ python tfr_visualization_main.py \
 --filename_list '/home/ubuntu/data/tensorflow/my_workspace/training_demo/Predictions/snapshot_serengeti_s01_s06-0-10000.record' \
 --outfile '/home/ubuntu/data/tensorflow/my_workspace/camera-trap-detection/test_images/' \
 --label_map_json '/home/ubuntu/data/tensorflow/my_workspace/camera-trap-detection/data/LILA/label_map.json' \
---num_batches 128
+--num_batches 256
 """
 
 import json, argparse
@@ -26,10 +26,16 @@ if __name__ == '__main__':
         )
     parser.add_argument(
     "--label_map_json", type=str, required=True,
-    help="label map json")
+    help="label map json"
+    )
     parser.add_argument(
         "--num_batches", type=int, default=1,
-        help="number of batches to save. batch size = 2")
+        help="number of batches to save. batch size = 2"
+    )
+    parser.add_argument(
+    "--score_threshold", type=float, default=0.5,
+    help="threshold of the detected box to be plotted"
+    )
 
     args = parser.parse_args()
 
@@ -37,4 +43,4 @@ if __name__ == '__main__':
          label_map = json.load(f)
     inv_label_map = {v: k for k, v in label_map.items()}
         
-    visual.plot_images_with_bbox_pred(args.filename_list, args.outfile, inv_label_map, args.num_batches)
+    visual.plot_images_with_bbox_pred(args.filename_list, args.outfile, inv_label_map, args.num_batches, score_threshold = args.score_threshold)
