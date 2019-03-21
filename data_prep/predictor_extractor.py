@@ -45,9 +45,15 @@ def decode_record(serialized_example, discard_image_pixels=True):
 
 def predictorExtractor(tfrecord_path_list,
                        output_csv,
+                       groundtruth_consolidated_dict,
                        discard_image_pixels=True,
                        batch_size=512, 
-                       score_threshold=0.5):
+                       score_threshold=0.5,
+                       is_training=True):
+    """
+    This requires a dicrionary with groudtruth file name and total animals in it
+    """
+    
     dataset = tf.data.Dataset.from_tensor_slices(tfrecord_path_list)
     dataset = tf.data.TFRecordDataset(dataset)
     dataset = dataset.repeat(1)
@@ -73,6 +79,12 @@ def predictorExtractor(tfrecord_path_list,
 
 
         for rec_i in range(0, int(batch_shape[0])):
+            if is_training==True:
+                num_box = groundtruth_consolidated_dict[filename[rec_i].numpy().decode('utf-8')]
+                if num_box in ['11-50', '51+']:
+                    score_threshold = 0.25
+                else:
+                    score_threshold = min(score[rec_i, 0:int(num_box)])
             box_counter = 0
             for box_i in range(0, int(batch_shape[1])):
                 if score[rec_i, box_i] < score_threshold:
