@@ -81,9 +81,10 @@ def training_data_prep_from_correct_prediction(prediction_csv_path,
     correct_predicted_df_dict = correct_predicted_df.to_dict(orient='index')
 
     for i, val in correct_predicted_df_dict.items():
-        correct_predicted_df_dict[i]['class'] = inverse_label_map[correct_predicted_df_dict[i]['labels']]
+#         correct_predicted_df_dict[i]['class'] = inverse_label_map[correct_predicted_df_dict[i]['labels']]
         if val['filename'] in corrected_image_list:
             correct_predicted_df_dict[i]['labels'] = [rec[1] for rec in corrected_image_species_list if val['filename'] in rec[0]][0]
+        correct_predicted_df_dict[i]['class'] = inverse_label_map[int(correct_predicted_df_dict[i]['labels'])]
 
     correct_predicted_final_df = pd.DataFrame.from_dict(correct_predicted_df_dict, orient='index')
     correct_predicted_final_df = correct_predicted_final_df[['filename', 'class', 'xmin', 'ymin', 'xmax', 'ymax']]
