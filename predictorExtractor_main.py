@@ -34,11 +34,8 @@ if __name__ == '__main__':
         "--label_map_json", type=str, required=True,
         help="path to the label map json file")
     parser.add_argument(
-        "--is_training", type=bool, default=True,
-        help="if the data is for the training purposes of bootstrapping step")
-
-
-
+        "--is_training", type=str, default='True',
+        help="if the data is for the training purposes of bootstrapping step. 1 for training 0 for test")
 
 
 #     kwargs = vars(parser.parse_args())
@@ -63,5 +60,5 @@ if __name__ == '__main__':
         else:
             groundtruth_consolidated_dict[v['filename']] = int(groundtruth_consolidated_dict[v['filename']])+int(v['groundtruth_counts'])
             
-    predictorExtractor(args.tfrecord_path_list, args.output_csv, groundtruth_consolidated_dict)
+    predictorExtractor(args.tfrecord_path_list, args.output_csv, groundtruth_consolidated_dict, is_training=args.is_training)
 #     predictorExtractor(**kwargs)

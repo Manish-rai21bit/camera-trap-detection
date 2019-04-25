@@ -49,7 +49,7 @@ def predictorExtractor(tfrecord_path_list,
                        discard_image_pixels=True,
                        batch_size=512, 
                        score_threshold=0.5,
-                       is_training=True):
+                       is_training='True'):
     """
     This requires a dicrionary with groudtruth file name and total animals in it
     """
@@ -79,7 +79,7 @@ def predictorExtractor(tfrecord_path_list,
 
 
         for rec_i in range(0, int(batch_shape[0])):
-            if is_training==True:
+            if is_training=='True':
                 num_box = groundtruth_consolidated_dict[filename[rec_i].numpy().decode('utf-8')]
                 if num_box in ['11-50', '51+']:
                     score_threshold = 0.25
