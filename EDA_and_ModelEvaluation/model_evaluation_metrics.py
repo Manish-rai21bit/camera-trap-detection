@@ -53,13 +53,13 @@ def get_binary_classifcation_overall_perfomance(pred_groundtruth_consolidate_df)
             else:
                 df_pred_gt_consolidated_dict[v['filename']]['correct_class'] += 0
                 df_pred_gt_consolidated_dict[v['filename']]['incorrect_class'] += 1
-
+    
+    df_pred_gt_consolidated_leve1_class = pd.DataFrame(df_pred_gt_consolidated_dict).transpose().reset_index()
     # The overall classification accuracy
     correct_df = df_pred_gt_consolidated_leve1_class[(df_pred_gt_consolidated_leve1_class.correct_class>=1) \
                                         & (df_pred_gt_consolidated_leve1_class.incorrect_class==0)]
     accuracy = correct_df.shape[0]/len(set(pred_groundtruth_consolidate_df.filename))
     print("The overall accuracy in classification: {0}".format(round(accuracy, 3)))
-    
     return accuracy
 
 def get_binary_classifcation_species_level_perfomance(pred_groundtruth_consolidate_df):
@@ -67,7 +67,7 @@ def get_binary_classifcation_species_level_perfomance(pred_groundtruth_consolida
     1. b - Species level classification metric. 
     """
     species_level_performance_binary = {}
-    for species in set(df_pred_gt_consolidated['species']):
+    for species in set(pred_groundtruth_consolidate_df['species']):
         species_level_performance_binary[species] = {}
         error = False
         df_temp = pred_groundtruth_consolidate_df[pred_groundtruth_consolidate_df['species']==species]
