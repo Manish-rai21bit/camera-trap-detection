@@ -24,43 +24,39 @@ def get_binary_classifcation_overall_perfomance(pred_groundtruth_consolidate_df)
     output: Accuracy on classification for images. 
             Ex - if the GroundTruth has ['lion', 'cats'] and predictions has ['lion', 'cats'] - Correct,
             else Incorrect
+            Precision
     """
     df_pred_gt_consolidated_inter = pred_groundtruth_consolidate_df.to_dict(orient='index')
     df_pred_gt_consolidated_dict = {}
     for k, v in df_pred_gt_consolidated_inter.items():
-
         if v['filename'] not in df_pred_gt_consolidated_dict.keys():
             df_pred_gt_consolidated_dict[v['filename']] = {}
-            if (v['prediction_counts'] not in ['11-50', '51+']) and (v['groundtruth_counts'] not in ['11-50', '51+']):
-                if (int(v['prediction_counts'])>0) and (int(v['groundtruth_counts'])>0):
-                    df_pred_gt_consolidated_dict[v['filename']]['correct_class'] = 1
-                    df_pred_gt_consolidated_dict[v['filename']]['incorrect_class'] = 0
-                else:
-                    df_pred_gt_consolidated_dict[v['filename']]['correct_class'] = 0
-                    df_pred_gt_consolidated_dict[v['filename']]['incorrect_class'] = 1
+            if pd.isnull(v['prediction_counts']) or pd.isnull(v['groundtruth_counts']):
+                df_pred_gt_consolidated_dict[v['filename']]['correct_class'] = 0
+                df_pred_gt_consolidated_dict[v['filename']]['incorrect_class'] = 1
             else:
-                if (v['prediction_counts'] == v['groundtruth_counts']):
-                    df_pred_gt_consolidated_dict[v['filename']]['correct_class'] = 1
-                    df_pred_gt_consolidated_dict[v['filename']]['incorrect_class'] = 0
-                else:
-                    df_pred_gt_consolidated_dict[v['filename']]['correct_class'] = 0
-                    df_pred_gt_consolidated_dict[v['filename']]['incorrect_class'] = 1
+                df_pred_gt_consolidated_dict[v['filename']]['correct_class'] = 1
+                df_pred_gt_consolidated_dict[v['filename']]['incorrect_class'] = 0
 
         else:
-            if v['prediction_counts']==v['groundtruth_counts']:
-                df_pred_gt_consolidated_dict[v['filename']]['correct_class'] += 1
-                df_pred_gt_consolidated_dict[v['filename']]['incorrect_class'] += 0
-            else:
+            if pd.isnull(v['prediction_counts']) or pd.isnull(v['groundtruth_counts']):
                 df_pred_gt_consolidated_dict[v['filename']]['correct_class'] += 0
                 df_pred_gt_consolidated_dict[v['filename']]['incorrect_class'] += 1
+            else:
+                df_pred_gt_consolidated_dict[v['filename']]['correct_class'] += 1
+                df_pred_gt_consolidated_dict[v['filename']]['incorrect_class'] += 0
     
     df_pred_gt_consolidated_leve1_class = pd.DataFrame(df_pred_gt_consolidated_dict).transpose().reset_index()
     # The overall classification accuracy
     correct_df = df_pred_gt_consolidated_leve1_class[(df_pred_gt_consolidated_leve1_class.correct_class>=1) \
                                         & (df_pred_gt_consolidated_leve1_class.incorrect_class==0)]
-    accuracy = correct_df.shape[0]/len(set(pred_groundtruth_consolidate_df.filename))
+    accuracy = sum(correct_df.correct_class)/len(set(df_pred_gt_consolidated_leve1_class.index))
+    precision = sum(df_pred_gt_consolidated_leve1_class.correct_class)/ \
+                            (sum(df_pred_gt_consolidated_leve1_class.correct_class) + \
+                             sum(df_pred_gt_consolidated_leve1_class.incorrect_class))
     print("The overall accuracy in classification: {0}".format(round(accuracy, 3)))
-    return accuracy
+    print("The overall precision in classification: {0}".format(round(precision, 3)))
+    return accuracy, precision
 
 def get_binary_classifcation_species_level_perfomance(pred_groundtruth_consolidate_df):
     """
