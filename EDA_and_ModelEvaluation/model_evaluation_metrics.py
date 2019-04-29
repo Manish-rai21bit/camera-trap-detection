@@ -67,8 +67,8 @@ def get_binary_classifcation_species_level_perfomance(pred_groundtruth_consolida
         species_level_performance_binary[species] = {}
         error = False
         df_temp = pred_groundtruth_consolidate_df[pred_groundtruth_consolidate_df['species']==species]
-        y_true = [val != 0 for val in df_temp["groundtruth_counts"]]
-        y_pred = [val != 0 for val in df_temp["prediction_counts"]]
+        y_true = [not(pd.isnull(val)) for val in df_temp["groundtruth_counts"]]
+        y_pred = [not(pd.isnull(val)) for val in df_temp["prediction_counts"]]
         try:
             tn, fp, fn, tp = metric.confusion_matrix(y_true, y_pred).ravel()
         except Exception:
