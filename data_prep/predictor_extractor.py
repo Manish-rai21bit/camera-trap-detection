@@ -49,6 +49,7 @@ def predictorExtractor(tfrecord_path_list,
                        discard_image_pixels=True,
                        batch_size=512, 
                        score_threshold=0.5,
+                       score_threshold_lower_bound_for_bootstrap=0.5,
                        is_training='True'):
     """
     This requires a dicrionary with groudtruth file name and total animals in it
@@ -84,7 +85,8 @@ def predictorExtractor(tfrecord_path_list,
                 if num_box in ['11-50', '51+']:
                     score_threshold = 0.25
                 else:
-                    score_threshold = min(score[rec_i, 0:int(num_box)])
+                    # max(min(scores), lower_bound) to enforce quality of boxes
+                    score_threshold = max(min(score[rec_i, 0:int(num_box)]), score_threshold_lower_bound_for_bootstrap)
             box_counter = 0
             for box_i in range(0, int(batch_shape[1])):
                 if score[rec_i, box_i] < score_threshold:

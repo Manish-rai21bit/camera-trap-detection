@@ -36,6 +36,9 @@ if __name__ == '__main__':
     parser.add_argument(
         "--is_training", type=str, default='True',
         help="if the data is for the training purposes of bootstrapping step. 1 for training 0 for test")
+    parser.add_argument(
+        "--score_threshold_lower_bound_for_bootstrap", type=float, default=0.0,
+        help="lower bound for score thresholds for bootstrapping rounds")
 
 
 #     kwargs = vars(parser.parse_args())
