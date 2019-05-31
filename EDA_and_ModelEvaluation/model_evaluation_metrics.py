@@ -62,6 +62,23 @@ def get_binary_classifcation_species_level_perfomance(pred_groundtruth_consolida
     """
     1. b - Species level classification metric. 
     """
+    # Overall Species Level
+    y_true = [not(pd.isnull(val)) for val in pred_groundtruth_consolidate_df["groundtruth_counts"]]
+    y_pred = [not(pd.isnull(val)) for val in pred_groundtruth_consolidate_df["prediction_counts"]]
+    tn, fp, fn, tp = metric.confusion_matrix(y_true, y_pred).ravel()
+    # For a classification task the recall is:
+    recall = round(tp/(tp + fn), 3) # Correct
+    precision = round(tp/(tp + fp), 3)
+    accuracy = round((tp)/(tp + fn), 3)
+    f1_score = round(2*recall*precision/(recall + precision), 3)
+    
+    print("Level 1: Species Level Overall")
+    print("Recall: {0}".format(recall))
+    print("Precision: {0}".format(precision))
+    print("F1-Score: {0}".format(f1_score))
+    print("Accuracy: {0}".format(accuracy))
+    
+    # Per Species Level
     species_level_performance_binary = {}
     for species in set(pred_groundtruth_consolidate_df['species']):
         species_level_performance_binary[species] = {}
