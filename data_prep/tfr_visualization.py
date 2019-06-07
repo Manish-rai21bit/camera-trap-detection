@@ -117,7 +117,7 @@ def plot_images_raw(filename_list,
                 fig,ax = plt.subplots(1)
                 fig.set_size_inches(10, 8)
                 # Display the image
-                ax.set_title(context['image/filename'][j].numpy().decode('utf-8'))
+                ax.set_title(context['image/filename'][j].numpy().decode('utf-8')+str(image.size))
                 ax.imshow(image)
                 fig.savefig(os.path.join(outfile, context['image/filename'][j].numpy().decode('utf-8').split('/')[-1]))
                 plt.clf
