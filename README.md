@@ -11,7 +11,7 @@ This historical volunteer classification data is used to validate the correctnes
 - Experiment 1 - detection score threshold of 0, where we forced the model to pick the number of boxes in predictions to match the Volunteer count classifications.
 - Experiment 2 - we forced the model to pick the number of boxes in predictions to match the Volunteer count classifications, for all detection score threshold at least 0.5.
 
-![BootStrapping Preformance]('./data/misc/bootstrap_performance.png')
+![BootStrapping Preformance](./data/misc/bootstrap_performance.png)
 
 Camera-traps are a rich data source for ecologists and is used to get a sense of the species population in the wild.
 
