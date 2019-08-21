@@ -1,9 +1,66 @@
 # Deep Learning for species detection in camera-trap data
+This module contains codes/references to:
+
+1. Weak Supervision framework
+
+2. Faster R-CNN training
+
+3. Evaluate model performance
+
 This module helps in creating a weakly supervised feedback loop, run successive model trainings using the repo [training-species-detection](https://github.com/Manish-rai21bit/training-species-detection)and  evaluate the model performance.
 
-For training an object detection model, we need a tons of training data with boxes drawn around each of the object of interest in the image along with their labels. Considering that we will need millions of images to train a deep neural network, it becomes a very tough task to prepare dataset to train an object detection model. In this work I use historical data classified by millions of volunteers with annotations at image level for species name and count of animals in the image. For counts >10, the volunteers were able to annotate the image into binned counts of 11-50 and 50+.
+### Weak Supervision: Introduction
+For training an object detection model, we need millions of training data with boxes drawn around each object of interest in the image along with their labels. The training data preparation process is time consuming and often acts as an entry barrier for researchers who want to experiment with these models. In this work I use historical data classified by millions of volunteers with annotations at image level for species name and count of animals in the image. For counts >10, the volunteers were able to annotate the image into binned counts of 11-50 and 50+.
 
-This historical volunteer classification data is used to validate the correctness of predictions made by the fine-tuned model, or correct the predictions in case where it is possible. The correct and corrected predictions are then converted to TF Records, added to the training dataset and used for subsequent training rounds.
+
+Weak supervision framework relies on the hypothesis and observation that once a Faster R-CNN architecture is trained on a small training set, it does very good in drawing boxes around the target objects but goes wrong in classifying the boxes. With this hypothesis, that we made through our observation with a small dataset, we train the architecture with a small dataset and then use this fine-tuned model to make predictions on newer images.
+
+For these new images, we have historical volunteer classification at image level(and not at bounding box level) and we use this information to validate the predictions for animal count and animal classes present.
+
+### Weak Supervision: Steps
+
+1. Fine tuning the pre-trained model - Please follow the link to start model fine-tuning [here](https://github.com/Manish-rai21bit/training-species-detection)! Add the training-species-detection repo to the python path. The steps within the model fine-tuning are:
+- Data Preparation: Bounding Box TF Record for training and evaluation.
+- Model fine-tuning
+- Monitoring the training on tensorboard
+- Export trained graph
+
+2. Make predictions - Making prediction on the new images require the below sub-steps:
+- Data Preparation: Create TF Records for the images that needs prediction using the script [here](https://github.com/Manish-rai21bit/training-species-detection/blob/master/dataset_tools/create_test_tf_record.py)
+- Make predictions
+- Extract predictions to CSV
+
+```
+for entry in "/home/ubuntu/data/tensorflow/my_workspace/training_demo/Predictions/S1_S6/round3/Infer_detection_output"/*
+do
+    tfr_filename=$(basename $entry)
+    # ----- Extracts the predictions from the TR Records into a CSV ----- #
+    python predictorExtractor_main.py \
+        --tfrecord_path_list $entry \
+        --output_csv '/home/ubuntu/data/tensorflow/my_workspace/training_demo/Predictions/S1_S6/round3/Post_procession_of_infer_detection/'${tfr_filename/'.record'}'.csv' \
+        --groundtruth_csv_path '/home/ubuntu/data/tensorflow/my_workspace/camera-trap-detection/data/LILA/db_export_season_all_cleaned.csv' \
+        --label_map_json '/home/ubuntu/data/tensorflow/my_workspace/camera-trap-detection/data/LILA/label_map.json' \
+        --is_training='True';
+
+    # ----- Creates a consolidated file with the outer join of prediction and groundtruth pecies count ----- #
+    python prediction_groundtruth_consolidation_main.py \
+        --prediction_csv_path '/home/ubuntu/data/tensorflow/my_workspace/training_demo/Predictions/S1_S6/round3/Post_procession_of_infer_detection/'${tfr_filename/'.record'}'.csv'  \
+        --groundtruth_csv_path '/home/ubuntu/data/tensorflow/my_workspace/camera-trap-detection/data/LILA/db_export_season_all_cleaned.csv' \
+        --label_map_json '/home/ubuntu/data/tensorflow/my_workspace/camera-trap-detection/data/LILA/label_map.json' \
+        --outfile '/home/ubuntu/data/tensorflow/my_workspace/training_demo/Predictions/S1_S6/round3/Post_procession_of_infer_detection/pred_groundtruth_consolidate_'${tfr_filename/'.record'}'.csv' ;
+
+    # ----- Creates a CSV with only the correct predictions ----- #
+    python bootstrapping_data_prep_main.py \
+        --pred_groundtruth_consolidate_csv '/home/ubuntu/data/tensorflow/my_workspace/training_demo/Predictions/S1_S6/round3/Post_procession_of_infer_detection/pred_groundtruth_consolidate_'${tfr_filename/'.record'}'.csv' \
+        --prediction_csv_path '/home/ubuntu/data/tensorflow/my_workspace/training_demo/Predictions/S1_S6/round3/Post_procession_of_infer_detection/'${tfr_filename/'.record'}'.csv'  \
+        --label_map_json '/home/ubuntu/data/tensorflow/my_workspace/camera-trap-detection/data/LILA/label_map.json' \
+        --outfile '/home/ubuntu/data/tensorflow/my_workspace/training_demo/Predictions/S1_S6/round3/Post_procession_of_infer_detection/bootstrap_data_'${tfr_filename/'.record'}'.csv' ;
+
+    # ----- What this does is creates the TF record that is ready to be fed into model training ----- #
+done
+
+```
+
 
 **Experiments**:
 
