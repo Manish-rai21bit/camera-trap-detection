@@ -50,7 +50,8 @@ def get_binary_classifcation_overall_perfomance(pred_groundtruth_consolidate_df)
     # The overall classification accuracy
     correct_df = df_pred_gt_consolidated_leve1_class[(df_pred_gt_consolidated_leve1_class.correct_class>=1) \
                                         & (df_pred_gt_consolidated_leve1_class.incorrect_class==0)]
-    accuracy = sum(correct_df.correct_class)/len(set(df_pred_gt_consolidated_leve1_class.index))
+#     accuracy = sum(correct_df.correct_class)/len(set(df_pred_gt_consolidated_leve1_class.index))
+    accuracy = correct_df.shape[0]/len(set(df_pred_gt_consolidated_leve1_class.index))
     precision = sum(df_pred_gt_consolidated_leve1_class.correct_class)/ \
                             (sum(df_pred_gt_consolidated_leve1_class.correct_class) + \
                              sum(df_pred_gt_consolidated_leve1_class.incorrect_class))
